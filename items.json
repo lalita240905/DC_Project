@@ -1,0 +1,3 @@
+{"_id":{"$oid":"68a15268d0531510d7eec4ac"},"item_id":101,"name":"Black wallet","description":"Leather wallet with ID cards inside","status":"lost","reported_by":19,"location":"College library"}
+{"_id":{"$oid":"68a152c9d0531510d7eec4ad"},"item_id":102,"name":"Samsung Phone","description":"Blue cover, with 1 phone charm","status":"found","reported_by":20,"location":"Canteen"}
+{"_id":{"$oid":"68a15352d0531510d7eec4ae"},"item_id":103,"name":"Water bottle","description":"Red colour bottle","status":"lost","reported_by":27,"location":"Room 411"}

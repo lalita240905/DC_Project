@@ -1,0 +1,2 @@
+{"_id":{"$oid":"68a15397d0531510d7eec4af"},"claim_id":1001,"item_id":102,"claimed_by":27,"status":"pending"}
+{"_id":{"$oid":"68a153c9d0531510d7eec4b0"},"claim_id":1002,"item_id":101,"claimed_by":20,"status":"approved"}

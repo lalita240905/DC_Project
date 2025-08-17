@@ -1,0 +1,3 @@
+{"_id":{"$oid":"68a15179d0531510d7eec4a9"},"user_id":19,"name":"Lalita","email":"lalita@gmail.com","phone":"9812345678"}
+{"_id":{"$oid":"68a151acd0531510d7eec4aa"},"user_id":20,"name":"Hritani","email":"hritani@gmail.com","phone":"9811223366"}
+{"_id":{"$oid":"68a151f2d0531510d7eec4ab"},"user_id":27,"name":"Jiya","email":"jiya@gmail.com","phone":"9988776655"}
