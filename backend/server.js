@@ -16,7 +16,7 @@ app.use(
 )
 
 // Environment variables (in production, use proper env file)
-const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key-change-in-production"
+const JWT_SECRET = process.env.JWT_SECRET || "b6988a8cf2c141fdb68443a64d0c096b3a21038f96fe82a1f04e6b69b0a9841727de4d78e2af09517bfe5210451b64b1b2ba876f7e749c5510519093cdad854c"
 const MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost:27017/lostandfound"
 
 // Connect to MongoDB
@@ -134,6 +134,18 @@ app.post("/api/auth/login", async (req, res) => {
   }
 })
 
+app.get("/api/auth/profile", authenticateToken, async (req, res) => {
+  try {
+    const user = await User.findOne({ username: req.user.username }).select("-password")
+    if (!user) {
+      return res.status(404).json({ error: "User not found" })
+    }
+    res.json({ username: user.username, email: user.email })
+  } catch (error) {
+    res.status(500).json({ error: error.message })
+  }
+})
+
 // Item Routes
 app.post("/api/items", authenticateToken, async (req, res) => {
   try {
@@ -152,7 +164,7 @@ app.post("/api/items", authenticateToken, async (req, res) => {
   }
 })
 
-app.get("/api/items", authenticateToken, async (req, res) => {
+app.get("/api/items", async (req, res) => {
   try {
     const items = await Item.find().sort({ createdAt: -1 })
     res.json(items)

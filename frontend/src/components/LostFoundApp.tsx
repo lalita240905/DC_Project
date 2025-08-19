@@ -4,14 +4,16 @@ import { useState, useEffect } from "react"
 import axios from "axios"
 import { LoginForm } from "./LoginForm"
 import { ItemCard } from "./ItemCard"
-import { Search, Plus, LogOut, User } from "lucide-react"
+import { Search, Plus, LogOut, UserIcon } from "lucide-react"
+import type { User, Item, LoginResponse } from "../types"
 
 export function LostFoundApp() {
-  const [user, setUser] = useState(null)
-  const [items, setItems] = useState([])
+  const [user, setUser] = useState<User | null>(null)
+  const [items, setItems] = useState<Item[]>([])
   const [searchTerm, setSearchTerm] = useState("")
   const [filterType, setFilterType] = useState("all")
   const [showAddForm, setShowAddForm] = useState(false)
+  const [loading, setLoading] = useState(true)
 
   const API_BASE_URL = "http://localhost:5000/api"
 
@@ -21,10 +23,12 @@ export function LostFoundApp() {
     if (token) {
       fetchUserProfile(token)
       fetchItems()
+    } else {
+      setLoading(false)
     }
   }, [])
 
-  const fetchUserProfile = async (token) => {
+  const fetchUserProfile = async (token: string): Promise<void> => {
     try {
       const response = await axios.get(`${API_BASE_URL}/auth/profile`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -33,28 +37,42 @@ export function LostFoundApp() {
     } catch (error) {
       console.error("Failed to fetch user profile:", error)
       localStorage.removeItem("token")
+    } finally {
+      setLoading(false)
     }
   }
 
-  const fetchItems = async () => {
+  const fetchItems = async (): Promise<void> => {
     try {
       const response = await axios.get(`${API_BASE_URL}/items`)
-      setItems(response.data)
+      setItems(response.data || [])
     } catch (error) {
       console.error("Failed to fetch items:", error)
+      setItems([])
     }
   }
 
-  const handleLogin = (userData) => {
+  const handleLogin = (userData: LoginResponse): void => {
     setUser(userData.user)
     localStorage.setItem("token", userData.token)
     fetchItems()
   }
 
-  const handleLogout = () => {
+  const handleLogout = (): void => {
     setUser(null)
     localStorage.removeItem("token")
     setItems([])
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    )
   }
 
   if (!user) {
@@ -72,8 +90,8 @@ export function LostFoundApp() {
             </div>
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                <User className="h-4 w-4" />
-                <span>{user.name}</span>
+                <UserIcon className="h-4 w-4" />
+                <span>{user.username}</span>
               </div>
               <button
                 onClick={handleLogout}
@@ -109,8 +127,8 @@ export function LostFoundApp() {
                 className="px-4 py-2 border border-border rounded-lg bg-input focus:outline-none focus:ring-2 focus:ring-ring"
               >
                 <option value="all">All Items</option>
-                <option value="lost">Lost</option>
-                <option value="found">Found</option>
+                <option value="LOST">Lost</option>
+                <option value="FOUND">Found</option>
               </select>
               <button
                 onClick={() => setShowAddForm(true)}
@@ -126,14 +144,16 @@ export function LostFoundApp() {
         {/* Items Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {items
-            .filter((item) => {
+            .filter((item: Item) => {
+              const title = item.title || ""
+              const desc = item.desc || ""
               const matchesSearch =
-                item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                item.description.toLowerCase().includes(searchTerm.toLowerCase())
+                title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                desc.toLowerCase().includes(searchTerm.toLowerCase())
               const matchesFilter = filterType === "all" || item.type === filterType
               return matchesSearch && matchesFilter
             })
-            .map((item) => (
+            .map((item: Item) => (
               <ItemCard key={item._id} item={item} onUpdate={fetchItems} />
             ))}
         </div>

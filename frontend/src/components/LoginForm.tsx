@@ -4,9 +4,10 @@ import type React from "react"
 import { useState } from "react"
 import axios from "axios"
 import { Eye, EyeOff, Mail, Lock, User } from "lucide-react"
+import type { LoginResponse } from "../types"
 
 interface LoginFormProps {
-  onLogin: (userData: any) => void
+  onLogin: (userData: LoginResponse) => void
 }
 
 export function LoginForm({ onLogin }: LoginFormProps) {
