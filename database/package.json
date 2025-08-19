@@ -1,0 +1,16 @@
+{
+  "name": "lost-found-database",
+  "version": "1.0.0",
+  "description": "Database setup and management for Lost & Found application",
+  "main": "setup.js",
+  "scripts": {
+    "setup": "node setup.js",
+    "seed": "node seed.js"
+  },
+  "dependencies": {
+    "mongodb": "^5.7.0"
+  },
+  "keywords": ["mongodb", "database", "setup"],
+  "author": "Your Name",
+  "license": "MIT"
+}
