@@ -87,3 +87,5 @@ const ItemCard = ({ item, onClaim }) => {
 };
 
 export default ItemCard;
+
+//hiya
