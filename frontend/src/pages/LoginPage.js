@@ -6,7 +6,7 @@ import axios from "axios"
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({
-    email: "",
+    username: "",  // ✅ changed from email -> username
     password: "",
   })
   const [error, setError] = useState("")
@@ -33,7 +33,7 @@ const LoginPage = () => {
 
       navigate("/lostfound")
     } catch (error) {
-      setError(error.response?.data?.message || "Login failed")
+      setError(error.response?.data?.error || "Login failed") // ✅ backend sends { error: "..." }
     } finally {
       setLoading(false)
     }
@@ -50,15 +50,15 @@ const LoginPage = () => {
 
           <div className="space-y-4">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Email address
+              <label htmlFor="username" className="block text-sm font-medium text-gray-700">
+                Username
               </label>
               <input
-                id="email"
-                name="email"
-                type="email"
+                id="username"
+                name="username"
+                type="text"
                 required
-                value={formData.email}
+                value={formData.username}
                 onChange={handleChange}
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
               />

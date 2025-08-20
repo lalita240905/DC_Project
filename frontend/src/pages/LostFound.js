@@ -1,22 +1,20 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import axios from "axios"
 import ItemCard from "../components/ItemCard"
+import AddItemForm from "../components/AddItemForm"
 
 const LostFound = () => {
   const [items, setItems] = useState([])
   const [filteredItems, setFilteredItems] = useState([])
   const [filter, setFilter] = useState("ALL")
   const [loading, setLoading] = useState(true)
+  const [showForm, setShowForm] = useState(false)
 
   useEffect(() => {
     fetchItems()
   }, [])
-
-  useEffect(() => {
-    filterItems()
-  }, [items, filter])
 
   const fetchItems = async () => {
     try {
@@ -29,16 +27,35 @@ const LostFound = () => {
     }
   }
 
-  const filterItems = () => {
+  const getStatus = (item) => (item.status || item.type || "").toString().toUpperCase()
+
+  // ✅ useCallback ensures stable reference for filterItems
+  const filterItems = useCallback(() => {
     if (filter === "ALL") {
       setFilteredItems(items)
     } else {
-      setFilteredItems(items.filter((item) => item.status.toUpperCase() === filter))
+      setFilteredItems(items.filter((item) => getStatus(item) === filter))
+    }
+  }, [items, filter])
+
+  useEffect(() => {
+    filterItems()
+  }, [filterItems]) // ✅ no warning now
+
+  const handleClaim = (itemId, updatedItem) => {
+    setItems((prevItems) =>
+      prevItems.map((item) => (item._id === itemId ? updatedItem : item))
+    )
+
+    if (getStatus(updatedItem) === "FOUND") {
+      setFilter("FOUND")
     }
   }
 
-  const handleClaim = (itemId) => {
-    setItems(items.map((item) => (item._id === itemId ? { ...item, claimed: true } : item)))
+  const handleAdd = (newItem) => {
+    setItems((prev) => [newItem, ...prev])
+    setFilter("ALL")
+    setShowForm(false)
   }
 
   if (loading) {
@@ -56,25 +73,36 @@ const LostFound = () => {
         <p className="text-gray-600">Find your lost items or help others find theirs</p>
       </div>
 
-      <div className="flex justify-center mb-8">
+      <div className="flex justify-between items-center mb-8">
         <div className="flex space-x-2">
           {["ALL", "LOST", "FOUND"].map((filterType) => (
             <button
               key={filterType}
               onClick={() => setFilter(filterType)}
               className={`px-6 py-2 rounded-full font-medium transition-colors ${
-                filter === filterType ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                filter === filterType
+                  ? "bg-blue-500 text-white"
+                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
               }`}
             >
               {filterType} (
               {filterType === "ALL"
                 ? items.length
-                : items.filter((item) => item.status.toUpperCase() === filterType).length}
+                : items.filter((item) => getStatus(item) === filterType).length}
               )
             </button>
           ))}
         </div>
+
+        <button
+          onClick={() => setShowForm((prev) => !prev)}
+          className="px-6 py-2 rounded-lg bg-green-500 text-white font-medium hover:bg-green-600"
+        >
+          + Add Item
+        </button>
       </div>
+
+      {showForm && <AddItemForm onAdd={handleAdd} />}
 
       {filteredItems.length === 0 ? (
         <div className="text-center py-12">
