@@ -16,7 +16,9 @@ app.use(
 )
 
 // Environment variables (in production, use proper env file)
-const JWT_SECRET = process.env.JWT_SECRET || "b6988a8cf2c141fdb68443a64d0c096b3a21038f96fe82a1f04e6b69b0a9841727de4d78e2af09517bfe5210451b64b1b2ba876f7e749c5510519093cdad854c"
+const JWT_SECRET =
+  process.env.JWT_SECRET ||
+  "b6988a8cf2c141fdb68443a64d0c096b3a21038f96fe82a1f04e6b69b0a9841727de4d78e2af09517bfe5210451b64b1b2ba876f7e749c5510519093cdad854c"
 const MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost:27017/lostandfound"
 
 // Connect to MongoDB
@@ -173,35 +175,46 @@ app.get("/api/items", async (req, res) => {
   }
 })
 
+// ✅ Claim Route
 app.post("/api/items/:id/claim", authenticateToken, async (req, res) => {
   try {
-    const item = await Item.findById(req.params.id)
+    console.log("Claim request for item:", req.params.id, "by", req.user);
 
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ error: "Invalid item ID" });
+    }
+
+    const item = await Item.findById(req.params.id);
     if (!item) {
-      return res.status(404).json({ error: "Item not found" })
+      return res.status(404).json({ error: "Item not found" });
     }
 
     if (item.posted_by === req.user.username) {
-      return res.status(400).json({ error: "You cannot claim your own item" })
+      return res.status(400).json({ error: "You cannot claim your own item" });
     }
 
     if (item.claimed_by) {
-      return res.status(400).json({ error: "Item already claimed" })
+      return res.status(400).json({ error: "Item already claimed" });
     }
 
-    item.claimed_by = req.user.username
-    await item.save()
+    // ✅ Update claim + move to FOUND, skip validators
+    const updatedItem = await Item.findByIdAndUpdate(
+      req.params.id,
+      {
+        claimed_by: req.user.username,
+        claimed_at: new Date(),
+        type: "found", // <-- added to move item to FOUND
+      },
+      { new: true, runValidators: false }
+    );
 
-    res.json({ message: "Item claimed successfully", item })
+    res.json({ message: "Item claimed successfully", item: updatedItem });
   } catch (error) {
-    res.status(500).json({ error: error.message })
+    console.error("Error in claim route:", error);
+    res.status(500).json({ error: error.message });
   }
-})
+});
 
-// Health check
-app.get("/api/health", (req, res) => {
-  res.json({ status: "Server is running", timestamp: new Date().toISOString() })
-})
 
 // Start server
 const PORT = process.env.PORT || 5000

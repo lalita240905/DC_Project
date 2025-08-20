@@ -2,24 +2,18 @@ const mongoose = require("mongoose")
 
 const claimSchema = new mongoose.Schema(
   {
-    claim_id: {
-      type: Number,
-      required: true,
-      unique: true,
-    },
     item_id: {
-      type: Number,
-      required: true,
+      type: mongoose.Schema.Types.ObjectId,
       ref: "Item",
+      required: true,
     },
     claimed_by: {
-      type: Number,
-      required: true,
+      type: mongoose.Schema.Types.ObjectId,
       ref: "User",
+      required: true,
     },
     status: {
       type: String,
-      required: true,
       enum: ["pending", "approved", "rejected"],
       default: "pending",
     },
@@ -36,18 +30,14 @@ const claimSchema = new mongoose.Schema(
       maxlength: 300,
     },
   },
-  {
-    timestamps: true,
-  },
-)
+  { timestamps: true }
+);
 
-// Indexes for better query performance
-claimSchema.index({ item_id: 1 })
-claimSchema.index({ claimed_by: 1 })
-claimSchema.index({ status: 1 })
-claimSchema.index({ claim_date: -1 })
+// Indexes
+claimSchema.index({ item_id: 1 });
+claimSchema.index({ claimed_by: 1 });
+claimSchema.index({ status: 1 });
+claimSchema.index({ claim_date: -1 });
+claimSchema.index({ item_id: 1, claimed_by: 1 }, { unique: true });
 
-// Compound index for efficient queries
-claimSchema.index({ item_id: 1, claimed_by: 1 }, { unique: true })
-
-module.exports = mongoose.model("Claim", claimSchema)
+module.exports = mongoose.model("Claim", claimSchema);

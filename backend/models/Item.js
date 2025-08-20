@@ -8,21 +8,16 @@ const itemSchema = new mongoose.Schema(
       trim: true,
       maxlength: 100,
     },
-    description: {
+    desc: {
       type: String,
       required: true,
       trim: true,
       maxlength: 1000,
     },
-    category: {
-      type: String,
-      required: true,
-      enum: ["Electronics", "Clothing", "Books", "Keys", "Jewelry", "Bags", "Documents", "Sports Equipment", "Other"],
-    },
     type: {
       type: String,
       required: true,
-      enum: ["lost", "found"],
+      enum: ["found", "lost"],
     },
     status: {
       type: String,
@@ -35,25 +30,8 @@ const itemSchema = new mongoose.Schema(
       trim: true,
       maxlength: 200,
     },
-    dateFound: {
-      type: Date,
-    },
-    dateLost: {
-      type: Date,
-    },
-    contactInfo: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    images: [
-      {
-        type: String, // URLs to uploaded images
-      },
-    ],
-    userId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+    posted_by: {
+      type: String, // Or ObjectId if linking to User
       required: true,
     },
     claimedBy: {
@@ -63,21 +41,11 @@ const itemSchema = new mongoose.Schema(
     claimedAt: {
       type: Date,
     },
-    tags: [
+    images: [
       {
-        type: String,
-        trim: true,
-        lowercase: true,
+        type: String, // URLs to uploaded images
       },
     ],
-    reward: {
-      type: Number,
-      min: 0,
-    },
-    isUrgent: {
-      type: Boolean,
-      default: false,
-    },
   },
   {
     timestamps: true,
@@ -87,14 +55,13 @@ const itemSchema = new mongoose.Schema(
 // Index for text search
 itemSchema.index({
   title: "text",
-  description: "text",
+  desc: "text",
   location: "text",
-  tags: "text",
 })
 
 // Index for filtering
-itemSchema.index({ category: 1, type: 1, status: 1 })
-itemSchema.index({ userId: 1 })
+itemSchema.index({ type: 1, status: 1 })
+itemSchema.index({ posted_by: 1 })
 itemSchema.index({ createdAt: -1 })
 
 module.exports = mongoose.model("Item", itemSchema)
